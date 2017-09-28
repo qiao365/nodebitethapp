@@ -19,9 +19,11 @@ app.oauth = oauthServer({
 
 app.get("/account/eth/:userIdentifier/:password", controllerOfEth.getAccountByUserIdentifier);
 app.get("/account/btc/:userIdentifier/:password", controllerOfBtc.getAccountByUserIdentifier);
-        
 
-var port = process.env.PORT || 11010;
+app.post("/blockchain/address/eth/bulk/:quantity", controllerOfEth.bulkCreateEthAddress);
+app.post("/blockchain/address/btc/bulk/:quantity", controllerOfBtc.bulkCreateBtcAddress);
+
+var port = process.env.PORT || 12010;
 app.listen(port);
 
 console.log(`> app is listening ${port}`);
