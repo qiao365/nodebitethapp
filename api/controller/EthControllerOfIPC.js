@@ -72,7 +72,7 @@ function generateCreateAddressPromise(password,key){
     return new Promise((resolve, reject)=>{
         let client = net.connect(`${datadir}/geth.ipc`, ()=>{
             console.log("connect to server geth.ipc");
-            client.write(JSON.stringify({"jsonrpc":"2.0","method":"personal_newAccount","params":[userPassword],"id":1}));
+            client.write(JSON.stringify({"jsonrpc":"2.0","method":"personal_newAccount","params":[password],"id":1}));
         });
         let dataString = '';
         client.on('data', (data)=>{

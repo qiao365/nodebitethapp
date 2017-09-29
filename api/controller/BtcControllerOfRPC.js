@@ -8,12 +8,10 @@ var client = new bitcoin.Client({
     timeout: 30000
 });
 
-module.exports = {
-    getAccountByUserIdentifier
-};
+var btc = module.exports;
 var accountMap = {};
 
-function getAccountByUserIdentifier(req, res){
+btc.getAccountByUserIdentifier = function getAccountByUserIdentifier(req, res){
     let userIdentifier = req.params.userIdentifier;
     let userPassword = req.params.password;
     let account = accountMap[userIdentifier];
@@ -41,3 +39,5 @@ function getAccountByUserIdentifier(req, res){
     });
 };
 
+btc.bulkCreateBtcAddress = function bulkCreateBtcAddress(req, res){
+};
