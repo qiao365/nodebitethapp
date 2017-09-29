@@ -11,8 +11,8 @@ var app = express();
 app.use(bodyParser.urlencoded({ extended:true }));
 app.use(bodyParser.json());
 
-app.oauth = oauthServer({
-    model: require('./api/model/oauth2_model')
+app.oauth = new oauthServer({
+    model: require('./api/model/oauth2.model')
 });
 
 app.get("/account/eth/:userIdentifier/:password", controllerOfEth.getAccountByUserIdentifier);

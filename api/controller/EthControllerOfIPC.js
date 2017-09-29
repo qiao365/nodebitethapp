@@ -1,7 +1,7 @@
 "use strict";
 
 const appUtil = require("../model/util.js");
-const ethModel = require("../model.eth.model");
+const ethModel = require("../model/eth.model");
 const net = require('net');
 const datadir = '/Users/liuhr/data/blockdata/ethereum/prod';
 var eth = module.exports;
