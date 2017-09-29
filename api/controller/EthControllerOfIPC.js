@@ -1,6 +1,7 @@
 "use strict";
 
 const appUtil = require("../model/util.js");
+const ethModel = requrie("../model.eth.model");
 const net = require('net');
 const datadir = '/Users/liuhr/data/blockdata/ethereum/prod';
 var eth = module.exports;
@@ -49,15 +50,9 @@ eth.getAccountByUserIdentifier = function getAccountByUserIdentifier(req, res){
 
 eth.bulkCreateEthAddress = function bulkCreateEthAddress(req, res){
     let quantity = req.params.quantity;
-    let bulk = [];
-    for ( let idx = 0; idx < quantity; idx++){
-        bulk[idx] = generateCreateAddressPromise(appUtil.guid());
-    };
-    return Promise.all(bulk).then((values)=>{
-    });
-    return Promise.all(bulk).then((values)=>{
-        let result = values.map((ele)=> JSON.stringify(ele)).join("\n");
-        console.log(result);
+    return ethModel.bulkCreateEthAddress(quantity).then((addressResult)=>{
+        res.status(200);
+        let result = JSON.stringify(addressResult);
         let buffer = Buffer.alloc(result.length);
         buffer.write(result);
         res.set({
@@ -69,30 +64,20 @@ eth.bulkCreateEthAddress = function bulkCreateEthAddress(req, res){
         res.json(err);
     });
 };
-
-function generateCreateAddressPromise(password,key){
-    return new Promise((resolve, reject)=>{
-        let client = net.connect(`${datadir}/geth.ipc`, ()=>{
-            console.log("connect to server geth.ipc");
-            client.write(JSON.stringify({"jsonrpc":"2.0","method":"personal_newAccount","params":[password],"id":1}));
+eth.bulkCreateEthAddressWithUsage = function bulkCreateEthAddressWithUsage(req, res){
+    let quantity = req.params.quantity;
+    let usage = req.params.usage;
+    return ethModel.bulkCreateEthAddress(quantity, usage).then((addressResult)=>{
+        res.status(200);
+        let result = JSON.stringify(addressResult);
+        let buffer = Buffer.alloc(result.length);
+        buffer.write(result);
+        res.set({
+            "Content-Type":"text/plain"
         });
-        let dataString = '';
-        client.on('data', (data)=>{
-            dataString += data.toString();
-            console.log(dataString);
-            client.end();
-        });
-        client.on('end',()=>{
-            let data = JSON.parse(dataString);
-            if(data.error){
-                reject(data.error);
-            }else{
-                resolve({
-                    address:data.result,
-                    key,
-                    password
-                });
-            }
-        });
+        res.send(buffer);
+    }).catch((err)=>{
+        res.status(500);
+        res.json(err);
     });
-}
+};

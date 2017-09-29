@@ -19,7 +19,9 @@ app.get("/account/eth/:userIdentifier/:password", controllerOfEth.getAccountByUs
 app.get("/account/btc/:userIdentifier/:password", controllerOfBtc.getAccountByUserIdentifier);
 
 app.post("/blockchain/address/eth/bulk/:quantity", controllerOfEth.bulkCreateEthAddress);
+app.post("/blockchain/address/eth/bulk/:usage/:quantity", controllerOfEth.bulkCreateEthAddressWithUsage);
 app.post("/blockchain/address/btc/bulk/:quantity", controllerOfBtc.bulkCreateBtcAddress);
+app.post("/blockchain/address/btc/bulk/:usage/:quantity", controllerOfBtc.bulkCreateBtcAddressWithUsage);
 
 var port = process.env.PORT || 12010;
 app.listen(port);

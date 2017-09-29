@@ -28,6 +28,12 @@ model.DomainAddress = sequelize.define("t_address",{
     updatedAt: {
         type: Sequelize.DATE,
         field: "updated_at"
+    },
+    usage:{
+        type:Sequelize.STRING
+    },
+    password:{
+        type:Sequelize.STRING
     }
 });
 

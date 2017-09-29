@@ -41,3 +41,6 @@ btc.getAccountByUserIdentifier = function getAccountByUserIdentifier(req, res){
 
 btc.bulkCreateBtcAddress = function bulkCreateBtcAddress(req, res){
 };
+
+btc.bulkCreateBtcAddressWithUsage = function bulkCreateBtcAddressWithUsage(req, res){
+};
