@@ -2,7 +2,7 @@
 
 var express = require("express");
 var bodyParser = require("body-parser");
-var oauthServer = require("oauth2-server");
+var oauthServer = require("express-oauth-server");
 
 var controllerOfEth = require("./api/controller/EthControllerOfIPC");
 var controllerOfBtc = require("./api/controller/BtcControllerOfRPC");
@@ -12,9 +12,7 @@ app.use(bodyParser.urlencoded({ extended:true }));
 app.use(bodyParser.json());
 
 app.oauth = oauthServer({
-  model: require('./api/model/oauth2_model'),
-  grants: ['password', 'refresh_token'],
-  debug: true
+    model: require('./api/model/oauth2_model')
 });
 
 app.get("/account/eth/:userIdentifier/:password", controllerOfEth.getAccountByUserIdentifier);

@@ -1,90 +1,102 @@
-var model = module.exports,
-    util = require('util'),
-    redis = require('redis');
+var model = module.exports;
+var bluebird = require('bluebird');
+var redisdb = require('redis');
+var db = redisdb.createClient();
+bluebird.promisifyAll(redisdb.RedisClient.prototype);
+bluebird.promisifyAll(redisdb.Multi.prototype);
 
-var db = redis.createClient();
-
-var keys = {
-    token: 'tokens:%s',
-    client: 'clients:%s',
-    refreshToken: 'refresh_tokens:%s',
-    grantTypes: 'clients:%s:grant_types',
-    user: 'users:%s'
+const KEYS = {
+    token: "token:",
+    client: "clients:",
+    refreshToken: "refresh_token:",
+    grantTypes: ":grant_types",
+    user: "users:",
+    controller: "controllers:"
 };
 
-model.getAccessToken = function (bearerToken, callback) {
-    db.hgetall(util.format(keys.token, bearerToken), function (err, token) {
-        if (err) return callback(err);
-
-        if (!token) return callback();
-
-        callback(null, {
+model.getAccessToken = function(bearerToken) {
+    return db.hgetallAsync(`${KEYS.token}${bearerToken}`).then((token) => {
+        if (!token) {
+            return undefined;
+        };
+        return {
             accessToken: token.accessToken,
-            clientId: token.clientId,
-            expires: token.expires ? new Date(token.expires) : null,
-            userId: token.userId
-        });
+            accessTokenExpiresAt: new Date(token.accessTokenExpiresAt),
+            client: JSON.parse(token.client),
+            refreshToken: token.refreshToken,
+            refreshTokenExpiresAt: new Date(token.refreshTokenExpiresAt),
+            user: JSON.parse(token.user)
+        };
     });
 };
 
-model.getClient = function (clientId, clientSecret, callback) {
-    db.hgetall(util.format(keys.client, clientId), function (err, client) {
-        if (err) return callback(err);
-
-        if (!client || client.clientSecret !== clientSecret) return callback();
-
-        callback(null, {
+model.getClient = function(clientId, clientSecret) {
+    let key = `${KEYS.client}${clientId}`;
+    return db.hgetallAsync(key).then((client) => {
+        if (!client || client.clientSecret !== clientSecret) return undefined;
+        return {
             clientId: client.clientId,
-            clientSecret: client.clientSecret
-        });
+            clientSecret: client.clientSecret,
+            grants: ["password", "refresh_token"]
+        };
     });
 };
 
-model.getRefreshToken = function (bearerToken, callback) {
-    db.hgetall(util.format(keys.refreshToken, bearerToken), function (err, token) {
-        if (err) return callback(err);
-
-        if (!token) return callback();
-
-        callback(null, {
-            refreshToken: token.accessToken,
-            clientId: token.clientId,
-            expires: token.expires ? new Date(token.expires) : null,
-            userId: token.userId
-        });
+model.getRefreshToken = function(bearerToken) {
+    console.log(bearerToken);
+    return db.hgetallAsync(`${KEYS.refreshToken}${bearerToken}`).then((token) => {
+        if (!token) return undefined;
+        return {
+            accessToken: token.accessToken,
+            accessTokenExpiresAt: new Date(token.accessTokenExpiresAt),
+            client: JSON.parse(token.client),
+            refreshToken: token.refreshToken,
+            refreshTokenExpiresAt: new Date(token.refreshTokenExpiresAt),
+            user: JSON.parse(token.user)
+        };
+    });
+};
+model.revokeToken = function(token){
+    console.log(token);
+    return db.delAsync(`${KEYS.refreshToken}${token.refreshToken}`).then((refreshed)=>{
+        return !!refreshed;
     });
 };
 
-model.grantTypeAllowed = function (clientId, grantType, callback) {
-    db.sismember(util.format(keys.grantTypes, clientId), grantType, callback);
-};
 
-model.saveAccessToken = function (accessToken, clientId, expires, user, callback) {
-    db.hmset(util.format(keys.token, accessToken), {
-        accessToken: accessToken,
-        clientId: clientId,
-        expires: expires ? expires.toISOString() : null,
-        userId: user.id
-    }, callback);
-};
-
-model.saveRefreshToken = function (refreshToken, clientId, expires, user, callback) {
-    db.hmset(util.format(keys.refreshToken, refreshToken), {
-        refreshToken: refreshToken,
-        clientId: clientId,
-        expires: expires ? expires.toISOString() : null,
-        userId: user.id
-    }, callback);
-};
-
-model.getUser = function (username, password, callback) {
-    db.hgetall(util.format(keys.user, username), function (err, user) {
-        if (err) return callback(err);
-
-        if (!user || password !== user.password) return callback();
-
-        callback(null, {
-            id: username
-        });
+model.getUser = function(username, password) {
+    let key = `${KEYS.user}${username}`;
+    return db.hgetallAsync(key).then((user) => {
+        if (!user || password !== user.password) {
+            return undefined;
+        }
+        return {
+            id: username,
+            accountId: user.accountId
+        };
     });
 };
+
+/**
+ * Save token.
+ */
+
+model.saveToken = function(token, client, user) {
+    var data = {
+        accessToken: token.accessToken,
+        accessTokenExpiresAt: token.accessTokenExpiresAt,
+        client: JSON.stringify(client),
+        refreshToken: token.refreshToken,
+        refreshTokenExpiresAt: token.refreshTokenExpiresAt,
+        user: JSON.stringify(user)
+    };
+
+    return Promise.all([
+        db.hmsetAsync(`${KEYS.token}${token.accessToken}`, data),
+        db.hmsetAsync(`${KEYS.refreshToken}${token.refreshToken}`, data)
+    ]).then(() => {
+        return data;
+    });
+};
+
+model.KEYS = KEYS;

@@ -54,6 +54,8 @@ eth.bulkCreateEthAddress = function bulkCreateEthAddress(req, res){
         bulk[idx] = generateCreateAddressPromise(appUtil.guid());
     };
     return Promise.all(bulk).then((values)=>{
+    });
+    return Promise.all(bulk).then((values)=>{
         let result = values.map((ele)=> JSON.stringify(ele)).join("\n");
         console.log(result);
         let buffer = Buffer.alloc(result.length);
