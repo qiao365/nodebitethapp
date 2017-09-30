@@ -92,12 +92,13 @@ model.DomainEthListener = sequelize.define("t_listener_eth",{
 },{
     indexes:[
         {
+            name:"t_listener_eth_address_hash_from_to_value_block_hash_index",
             fields:["address", "tx_hash", "tx_from", "tx_to", "tx_value", "tx_block_hash","tx_index"]
         }
     ]
 });
 
 // need 
-sequelize.sync({force:false }).then(()=>{
+sequelize.sync({force:false}).then(()=>{
     console.log("sync the table ");
 });
