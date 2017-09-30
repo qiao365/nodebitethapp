@@ -1,0 +1,12 @@
+echo 'npm install bitcoin'
+npm install bitcoin
+echo 'npm install bluebird'
+npm install bluebird
+echo 'npm install body-parser'
+npm install body-parser
+echo 'npm install express'
+npm install express
+echo 'npm install express-oauth-server'
+npm install express-oauth-server
+echo 'npm install pg'
+npm install pg
