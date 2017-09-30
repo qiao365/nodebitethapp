@@ -6,6 +6,9 @@ const datadir = '/Users/liuhr/data/blockdata/ethereum/prod';
 
 const DomainAddress = require("../domain/database.define").DomainAddress;
 
+const Web3 = require("Web3");
+var web3 = new Web3();
+
 var eth = module.exports;
 
 
@@ -63,3 +66,5 @@ function generateCreateAddressPromise(password,key){
         });
     });
 }
+
+function startFilter
