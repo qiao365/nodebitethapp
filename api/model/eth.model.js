@@ -7,7 +7,9 @@ const datadir = '/Users/liuhr/data/blockdata/ethereum/prod';
 const DomainAddress = require("../domain/database.define").DomainAddress;
 
 const Web3 = require("Web3");
-var web3 = new Web3();
+var web3 = new Web3(new Web3.providers.IpcProvider('/Volumes/blockdata/ethereum/prod/geth.ipc', net));
+//var web3 = Web3;
+//web3.setProvider(new web3.providers.IpcProvider('/Volumes/blockdata/ethereum/prod/geth.ipc', net));
 
 var eth = module.exports;
 
@@ -65,6 +67,69 @@ function generateCreateAddressPromise(password,key){
             }
         });
     });
-}
+};
 
-function startFilter
+var ethFilter = {};
+eth.startFilter = function startFilter(){
+    return DomainAddress.findAll({
+        where:{
+            bankType:"ETH",
+            status:"ok"
+        }
+    }).then((addressInstanceArray)=>{
+        let addressArray = addressInstanceArray.map((ele)=> ele.toJSON());
+        console.log(`addressArray:${JSON.stringify(addressArray)}`);
+        let address = addressArray.map((ele)=>ele.address);
+        return subscribeLogs(address, [null, null]);
+    });
+};
+
+eth.stopFilter = function stopFilter(key){
+    return new Promise((resolve, reject)=>{
+        let filter = ethFilter[key];
+        if(filter!= null){
+            filter.unsubscribe((error, success)=>{
+                if(success){
+                    console.log("Success unsubscribed");
+                    resolve("ok");
+                } else {
+                    reject("Error when unsubscribe");
+                }
+            });
+        } else{
+            resolve("ok");
+        };
+    });
+};
+
+function subscribeLogs(address, topics){
+    var option = {
+        fromBlock: 4249784,
+        address: address || web3.eth.accounts,
+        topics: topics || [null]
+    };
+
+    ethFilter.logs = web3.eth.filter(option);
+    ethFilter.logs.watch(function(error, result){
+        if(!error){
+            console.log(`no error: ${result}`);
+        } else {
+            console.log(`error: ${error}`);
+        };
+    });
+    return ethFilter.logs;
+};
+function subscribeSyncing(address, topics){
+    return new Promise((resolve, reject)=>{
+        ethFilter.syncing = web3.eth.subscribe("syncing", (error, result) =>{
+            if(!error){
+                console.log(`no error: ${result}`);
+            } else {
+                console.log(`error: ${error}`);
+            };
+        }).on("data", (blockdata) => {
+            console.log(`data:${JSON.stringify(blockdata)}`);
+        });
+        resolve(ethFilter);
+    });
+};

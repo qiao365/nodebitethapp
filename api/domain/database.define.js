@@ -100,5 +100,4 @@ model.DomainEthListener = sequelize.define("t_listener_eth",{
 
 // need 
 sequelize.sync({force:false}).then(()=>{
-    console.log("sync the table ");
 });
