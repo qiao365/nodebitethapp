@@ -1,7 +1,7 @@
 "use strict";
 
 const appUtil = require("../model/util.js");
-const ethModel = require("../model.eth.model");
+const ethModel = require("../model/eth.model");
 const net = require('net');
 const datadir = '/Users/liuhr/data/blockdata/ethereum/prod';
 var eth = module.exports;
@@ -79,5 +79,24 @@ eth.bulkCreateEthAddressWithUsage = function bulkCreateEthAddressWithUsage(req, 
     }).catch((err)=>{
         res.status(500);
         res.json(err);
+    });
+};
+
+eth.startFilter = function startFilter(req, res){
+    return ethModel.startFilter().then((filter)=>{
+        res.status(200);
+        res.json({
+            msg:"ok"
+        });
+    });
+};
+
+eth.stopFilter = function startFilter(req, res){
+    let filterKey = req.params.filterKey;
+    return ethModel.stopFilter(filterKey).then((result)=>{
+        res.status(200);
+        res.json({
+            msg: result
+        });
     });
 };

@@ -17,7 +17,7 @@
     "express-oauth-server": "^2.0.0",
     "pg": "^7.3.0",
     "redis": "^2.8.0",
-      "sequelize": "^4.11.0",
-    "web3": "^0.19.1"
+    "sequelize": "^4.11.0",
+    "web3": "^0.14.0"
   }
 }

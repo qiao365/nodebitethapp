@@ -4,7 +4,7 @@ const Sequelize = require('./bitapp.prepare').Sequelize;
 const sequelize = require('./bitapp.prepare').sequelize;
 const redis = require('./bitapp.prepare').redis;
 
-const KEYS = require("../models/oauth2.model").keys;
+const KEYS = require("../model/oauth2.model").KEYS;
 
 var model = module.exports;
 
@@ -92,12 +92,12 @@ model.DomainEthListener = sequelize.define("t_listener_eth",{
 },{
     indexes:[
         {
+            name:"t_listener_eth_address_hash_from_to_value_block_hash_index",
             fields:["address", "tx_hash", "tx_from", "tx_to", "tx_value", "tx_block_hash","tx_index"]
         }
     ]
 });
 
 // need 
-sequelize.sync({force:false }).then(()=>{
-    console.log("sync the table ");
+sequelize.sync({force:false}).then(()=>{
 });

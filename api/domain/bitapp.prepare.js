@@ -1,5 +1,5 @@
 var Sequelize = require('sequelize');
-const KEYS = require("../models/oauth2.model").KEYS;
+const KEYS = require("../model/oauth2.model").KEYS;
 
 const APP = "nodebitapp";
 var sequelize = new Sequelize(APP, APP, APP, {

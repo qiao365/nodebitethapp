@@ -11,8 +11,8 @@ var app = express();
 app.use(bodyParser.urlencoded({ extended:true }));
 app.use(bodyParser.json());
 
-app.oauth = oauthServer({
-    model: require('./api/model/oauth2_model')
+app.oauth = new oauthServer({
+    model: require('./api/model/oauth2.model')
 });
 
 app.get("/account/eth/:userIdentifier/:password", controllerOfEth.getAccountByUserIdentifier);
@@ -22,6 +22,9 @@ app.post("/blockchain/address/eth/bulk/:quantity", controllerOfEth.bulkCreateEth
 app.post("/blockchain/address/eth/bulk/:usage/:quantity", controllerOfEth.bulkCreateEthAddressWithUsage);
 app.post("/blockchain/address/btc/bulk/:quantity", controllerOfBtc.bulkCreateBtcAddress);
 app.post("/blockchain/address/btc/bulk/:usage/:quantity", controllerOfBtc.bulkCreateBtcAddressWithUsage);
+
+app.post("/blockchain/address/eth/listen/start", controllerOfEth.startFilter);
+app.post("/blockchain/address/eth/listen/stop/:filterKey", controllerOfEth.stopFilter);
 
 var port = process.env.PORT || 12010;
 app.listen(port);
