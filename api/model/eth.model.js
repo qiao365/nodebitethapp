@@ -17,36 +17,10 @@ var eth = module.exports;
 
 eth.bulkCreateEthAddress = function bulkCreateEthAddress(quantity, usage) {
     let bulk = [];
-    return new Promise((resolve, reject) => {
-        let client = net.connect(`${datadir}/geth.ipc`);
-        client.on("connect", () => {
-            resolve(client);
-        });
-    }).then((client) => {
-        return new Promise((resolve, reject) => {
-            let resultArray = [];
-            let password, key = usage;
-            for (var start = 0; start < quantity; ++start) {
-                password = appUtil.guid();
-                client.write(JSON.stringify({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [password], "id": (start + 1) }));
-                client.on("data", (data) => {
-                    let dj = JSON.parse(data.toString());
-                    if (dj.error) {
-                        reject(dj.error);
-                    } else {
-                        resultArray.push({
-                            address: dj.result,
-                            key,
-                            password
-                        });
-                        if (start == quantity - 1) {
-                            resolve(resultArray);
-                        }
-                    };
-                });
-            };
-        });
-    }).then((resultArray) => {
+    for (let idx = 0; idx < quantity; idx++) {
+        bulk[idx] = generateCreateAddressPromise(appUtil.guid());
+    };
+    return Promise.all(bulk).then((values) => {
         let bulkData = values.map((ele) => {
             return {
                 address: ele.address,
@@ -57,15 +31,15 @@ eth.bulkCreateEthAddress = function bulkCreateEthAddress(quantity, usage) {
             };
         });
         return DomainAddress.bulkCreate(bulkData);
-    }).then((instanceArray) => {
+    }).then((addressInstanceArray) => {
         return {
             status: "ok",
-            sqldata: instanceArray.map((ele) => {
-                return `insert into t_lib_eth (status, address) values ('ok', '${ele.toJSON().address}');`;
+            sqldata: addressInstanceArray.map((ele) => {
+                let ej = ele.toJSON();
+                return `insert into t_lib_eth (status, address) values ('ok', '${ej.address}');`;
             }),
             msg: `generate ${quantity} eth address`
         };
-
     });
 };
 
@@ -74,6 +48,25 @@ function generateCreateAddressPromise(password, key) {
         let client = net.connect(`${datadir}/geth.ipc`, () => {
             console.log("connect to server geth.ipc");
             client.write(JSON.stringify({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [password], "id": 1 }));
+        });
+        let dataString = '';
+        client.on('data', (data) => {
+            dataString += data.toString();
+            client.end();
+        });
+        client.on('end', () => {
+            let data = JSON.parse(dataString);
+            if (data.error) {
+                reject(data.error);
+            } else {
+                resolve({
+                    address: data.result,
+                    key,
+                    password
+                });
+            };
+            client.destroy();
+            console.log("destroy the socket");
         });
     });
 };
