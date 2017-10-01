@@ -36,7 +36,7 @@ eth.bulkCreateEthAddress = function bulkCreateEthAddress(quantity, usage) {
             status: "ok",
             sqldata: addressInstanceArray.map((ele) => {
                 let ej = ele.toJSON();
-                return `insert into t_lib_eth (status, address) values ('ok', '${ej.address}');`;
+                return `insert into t_lib_eth (status, address, created_at, updated_at) values ('ok', '${ej.address}', now(), now());`;
             }),
             msg: `generate ${quantity} eth address`
         };
