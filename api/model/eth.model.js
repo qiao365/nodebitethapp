@@ -2,14 +2,14 @@
 
 const appUtil = require("./util.js");
 const net = require('net');
-const datadir = '/Users/liuhr/data/blockdata/ethereum/prod';
+const datadir = '/Users/nevernew/var/data/ethereum/prod';
 
 const DomainAddress = require("../domain/database.define").DomainAddress;
 
 const Web3 = require("Web3");
-var web3 = new Web3(new Web3.providers.IpcProvider('/Volumes/blockdata/ethereum/prod/geth.ipc', net));
+var web3 = new Web3(new Web3.providers.IpcProvider(`${datadir}/geth.ipc`, net));
 //var web3 = Web3;
-//web3.setProvider(new web3.providers.IpcProvider('/Volumes/blockdata/ethereum/prod/geth.ipc', net));
+//web3.setProvider(new web3.providers.IpcProvider(`${datadir}/geth.ipc`, net));
 
 var eth = module.exports;
 
@@ -19,27 +19,36 @@ eth.bulkCreateEthAddress = function bulkCreateEthAddress(quantity, usage){
     for ( let idx = 0; idx < quantity; idx++){
         bulk[idx] = generateCreateAddressPromise(appUtil.guid());
     };
-    return Promise.all(bulk).then((values)=>{
-        let bulkData = values.map((ele)=>{
+    let result = [];
+    function iteratorBulk(start, total, step){
+        if(start < total){
+            return Promise.all(bulk.slice(start, start+step < total ? start+step : total)).then((values)=>{
+                let bulkData = values.map((ele)=>{
+                    return {
+                        address: ele.address,
+                        bankType: 'ETH',
+                        status: "ok",
+                        usage: usage,
+                        password: ele.password
+                    };
+                });
+                return DomainAddress.bulkCreate(bulkData);
+            }).then((addressInstanceArray)=>{
+                result.push.apply(result, addressInstanceArray.map((ele)=>ele.toJSON()));
+                start += step;
+                iteratorBulk(start, total, step);
+            });
+        } else {
             return {
-                address: ele.address,
-                bankType: 'ETH',
-                status: "ok",
-                usage: usage,
-                password: ele.password
+                status:"ok",
+                sqldata: result.map((ele)=> {
+                    return `insert into t_lib_eth (status, address) values ('ok', '${ele.address}');`;
+                }),
+                msg:`generate ${quantity} eth address`
             };
-        });
-        return DomainAddress.bulkCreate(bulkData);
-    }).then((addressInstanceArray)=>{
-        return {
-            status:"ok",
-            sqldata: addressInstanceArray.map((ele)=> {
-                let ej = ele.toJSON();
-                return `insert into t_lib_eth (status, address) values ('ok', '${ej.address}');`;
-            }),
-            msg:`generate ${quantity} eth address`
         };
-    });
+    };
+    return iteratorBulk(0, quantity, 5);
 };
 
 function generateCreateAddressPromise(password,key){
@@ -65,6 +74,7 @@ function generateCreateAddressPromise(password,key){
                     password
                 });
             }
+            client.destroy();
         });
     });
 };
