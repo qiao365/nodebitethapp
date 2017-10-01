@@ -46,7 +46,6 @@ eth.bulkCreateEthAddress = function bulkCreateEthAddress(quantity, usage) {
 function generateCreateAddressPromise(password, key) {
     return new Promise((resolve, reject) => {
         let client = net.connect(`${datadir}/geth.ipc`, () => {
-            console.log("connect to server geth.ipc");
             client.write(JSON.stringify({ "jsonrpc": "2.0", "method": "personal_newAccount", "params": [password], "id": 1 }));
         });
         let dataString = '';
@@ -66,7 +65,6 @@ function generateCreateAddressPromise(password, key) {
                 });
             };
             client.destroy();
-            console.log("destroy the socket");
         });
     });
 };
