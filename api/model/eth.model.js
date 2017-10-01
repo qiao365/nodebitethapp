@@ -2,8 +2,8 @@
 
 const appUtil = require("./util.js");
 const net = require('net');
-// const datadir = '/Users/nevernew/var/data/ethereum/prod';
-const datadir = '/Users/liuhr/data/blockdata/ethereum/prod';
+const datadir = '/Users/nevernew/var/data/ethereum/prod';
+//const datadir = '/Users/liuhr/data/blockdata/ethereum/prod';
 
 const DomainAddress = require("../domain/database.define").DomainAddress;
 
