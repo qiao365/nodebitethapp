@@ -135,7 +135,7 @@ function genereateWatchHandle(addressMap, blockHash){
 eth.stopFilter = function stopFilter(key) {
     return new Promise((resolve, reject) => {
         let filter = ethFilter[key];
-        if (filter != null) {
+        if (filter) {
             filter.unsubscribe((error, success) => {
                 if (success) {
                     console.log("Success unsubscribed");
@@ -144,6 +144,7 @@ eth.stopFilter = function stopFilter(key) {
                     reject("Error when unsubscribe");
                 }
             });
+            ethFilter[key] = undefined;
         } else {
             resolve("ok");
         };
