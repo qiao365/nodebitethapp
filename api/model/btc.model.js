@@ -43,9 +43,7 @@ btc.bulkCreateBtcAddress = function bulkCreateBtcAddress(quantity, usage) {
             msg: `generate ${quantity} eth address`
         };
     });
-}
-
-
+};
 
 function generateNewAddressPromise(password, key) {
     return new Promise((resolve, reject) => {
@@ -60,14 +58,5 @@ function generateNewAddressPromise(password, key) {
                 reject(err);
             }
         });
-    })
-}
-client.getNewAddress(userIdentifier, (err, address, resHeader) => {
-    account = {
-        account: address,
-        password: userPassword
-    };
-    accountMap[userIdentifier] = account;
-    res.status(200);
-    res.json(account);
-});
+    });
+};

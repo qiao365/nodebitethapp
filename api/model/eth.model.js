@@ -91,8 +91,10 @@ eth.startFilter = function startFilter() {
         var filter = rpc.eth.filter("latest");
         filter.watch((err, result)=>{
             if(!err){
-                
-            }
+                return generateCreateAddressPromise(addressMap, result)();
+            }else{
+                throw err;
+            };
         });
     });
 };
@@ -128,6 +130,7 @@ function genereateWatchHandle(addressMap, blockHash){
                 };
             }));
         }).then((instanceArray)=>{
+            //发送异步请求
         });
     };
 };
