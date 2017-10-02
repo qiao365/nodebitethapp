@@ -7,8 +7,8 @@ const DomainAddress = require("../domain/database.define").DomainAddress;
 var client = new bitcoin.Client({
     port: 8332,
     host: 'localhost',
-    user: 'your_rpc_user',
-    pass: 'your_rpc_password',
+    user: 'somenew',
+    pass: 'bydpdwz218',
     timeout: 30000
 });
 
@@ -61,13 +61,4 @@ function generateNewAddressPromise(password, key) {
             }
         });
     })
-}
-client.getNewAddress(userIdentifier, (err, address, resHeader) => {
-    account = {
-        account: address,
-        password: userPassword
-    };
-    accountMap[userIdentifier] = account;
-    res.status(200);
-    res.json(account);
-});
+};

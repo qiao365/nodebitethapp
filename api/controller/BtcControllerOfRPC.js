@@ -1,6 +1,6 @@
 "use strict";
 
-const btcModel = require("../model/btc.mode");
+const btcModel = require("../model/btc.model");
 var btc = module.exports;
 var accountMap = {};
 
