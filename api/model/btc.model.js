@@ -1,6 +1,7 @@
 "use strict";
 const bitcoin = require('bitcoin');
 const appUtil = require('./util');
+const timer = require("timers");
 
 const DomainAddress = require("../domain/database.define").DomainAddress;
 
@@ -58,5 +59,30 @@ function generateNewAddressPromise(password, key) {
                 reject(err);
             }
         });
+    });
+};
+
+let btcFilter = {
+};
+
+btc.startFilter = function startFilter(){
+    return new Promise((resovle, reject)=>{
+        btcFilter.promoserver = timer.setInterval(()=>{
+        }, 5 * 60 * 1000);
+    });
+};
+
+function handleListenBtcblock(){
+    return Promise((resovle, reject)=>{
+    })
+}
+
+
+btc.stopFilter = function stopFilter(){
+    return new Promise((resolve, reject)=>{
+        if(btcFilter.promoserver){
+            timer.clearInterval(btcFilter.promoserver);
+            btcFilter.promoserver = undefined;
+        }
     });
 };

@@ -26,6 +26,9 @@ app.post("/blockchain/address/btc/bulk/:usage/:quantity", controllerOfBtc.bulkCr
 app.post("/blockchain/address/eth/listen/start", controllerOfEth.startFilter);
 app.post("/blockchain/address/eth/listen/stop/:filterKey", controllerOfEth.stopFilter);
 
+app.post("/blockchain/address/btc/listen/start", controllerOfBtc.startFilter);
+app.post("/blockchain/address/btc/listen/stop/:filterKey", controllerOfBtc.stopFilter);
+
 var port = process.env.PORT || 12010;
 app.listen(port);
 
