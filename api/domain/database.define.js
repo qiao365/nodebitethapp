@@ -97,7 +97,37 @@ model.DomainEthListener = sequelize.define("t_listener_eth",{
         }
     ]
 });
-
+model.DomainSyncResult = sequelize.define("t_sync_result",{
+    txHash:{
+        type:Sequelize.STRING,
+        field:"tx_hash"
+    },
+    usage:{
+        type:Sequelize.STRING,
+        field:"usage"
+    },
+    status:{
+        type:Sequelize.STRING,
+        field:"status"
+    },
+    createdAt: {
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW,
+        field: "created_at"
+    },
+    updatedAt: {
+        type: Sequelize.DATE,
+        field: "updated_at"
+    }
+},{
+    indexes:[
+        {
+            name:"t_sync_result_hash_usage",
+            fields:["tx_hash", "usage"],
+            unique: true
+        }
+    ]
+});
 // need 
 sequelize.sync({force:false}).then(()=>{
 });

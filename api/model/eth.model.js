@@ -2,11 +2,13 @@
 
 const appUtil = require("./util.js");
 const net = require('net');
+const http = require("http");
 const datadir = '/Users/nevernew/var/data/ethereum/prod';
 //const datadir = '/Users/liuhr/data/blockdata/ethereum/prod';
 
 const DomainAddress = require("../domain/database.define").DomainAddress;
 const DomainEthListener = require("../domain/database.define").DomainEthListener;
+
 
 const Web3 = require("Web3");
 var web3 = new Web3(new Web3.providers.IpcProvider(`${datadir}/geth.ipc`, net));
@@ -130,7 +132,33 @@ function genereateWatchHandle(addressMap, blockHash){
                 };
             }));
         }).then((instanceArray)=>{
+            return new Promise((resolve, reject)=>{
+                let req = http.request({
+                }, (res)=>{
+                    let data = '';
+                    res.setEncoding("utf8");
+                    res.on("data", (chunk)=>{
+                        data += chunk;
+                    });
+                    res.on("end", ()=>{
+                        resolve(data);
+                    });
+                });
+                req.on('error', (e)=>{
+                    reject(e);
+                });
+                req.write(JSON.stringify({
+                    bankType:"ETH",
+                    data: instanceArray.map((ele)=> ele.toJSON())
+                }));
+                req.end();
+            });
             //发送异步请求
+        }).then((requesResult)=>{
+            let successSync = requesResult && requesResult.result && requesResult.result.length > 0;
+            if( successSync){
+                DomainEthListener.bulkCreate(requesResult.result);
+            }
         });
     };
 };
