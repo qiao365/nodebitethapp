@@ -81,30 +81,70 @@ btc.startFilter = function startFilter() {
     }).then((addressMap) => {
         btcFilter.promoserver = timer.setInterval(() => {
             return handleListenBtcblock(addressMap);
-        }, 5 * 60 * 1000);
+        }, 0.5 * 60 * 1000);
         return btcFilter.promoserver;
     });
 };
 
-let blockHeight = 0;
+var blockHeight = 0;
 
 function handleListenBtcblock(addressMap) {
-    blockHeight = blockHeight || client.getBlockCount();
-    console.log("blockHeight:"+blockHeight);
-    let blockHash = client.getBlockHash();
-    if(!blockHash) return undefined;
-    console.log("blockHash:"+blockHash);
-    blockHeight += 1;
-    let blockJSON = client.getBlock(blockHash, 1); // 0 string , 1 json
-    console.log("blockJson:"+blockJSON);
-    let bulkTxInfo = blockJSON.tx.map((ele, idx) => {
-        return new Promise((resolve, reject) => {
-            let tx = bitcoin.getTransaction(ele);
-            tx.txIndex = idx;
-            resolve(tx);
+    let blockHash = '';
+    return new Promise((resolve, reject)=>{
+        client.getBlockCount((err, height, resHeader)=>{
+            if(!err){
+                console.log(height);
+                resolve(height);
+            }else{
+                reject(err);
+            };
         });
-    });
-    return Promise.all(bulkTxInfo).then((txArray) => {
+    }).then((height)=>{
+        if(height > blockHeight){
+            blockHeight = height;
+            return new Promise((resolve, reject)=>{
+                client.getBlockHash(blockHeight, (err, result, resHeader)=>{
+                    if(!err){
+                        console.log(result);
+                        resolve(result);
+                    }else {
+                        reject(err);
+                    };
+                });
+            });
+        }else{
+            throw {
+                code: 2000
+            };
+        }
+    }).then((blockhash)=>{
+        blockHash = blockhash;
+        return new Promise((resolve, reject)=>{
+            client.getBlock(blockHash, 1, (err, result, resHeader)=>{
+                if(!err){
+                    console.log(result);
+                    resolve(result);
+                }else{
+                    reject(err);
+                };
+            });
+        });
+    }).then((blockJson)=>{
+        let bulkTxInfo = blockJson.tx.map((ele, idx) => {
+            return new Promise((resolve, reject) => {
+                bitcoin.getTransaction(ele, (err, tx, resHeader)=>{
+                    if(!err){
+                        console.log(tx);
+                        tx.txIndex = idx;
+                        resolve(tx);
+                    }else {
+                        reject(err);
+                    };
+                });
+            });
+        });
+        return Promise.all(bulkTxInfo);
+    }).then((txArray) => {
         let relativeTx = txArray.filter((ele) => {
             let isRelative = ele.details.filter((ele) => {
                 return addressMap[ele.address];
@@ -158,6 +198,8 @@ function handleListenBtcblock(addressMap) {
         if (successSync) {
             DomainSyncResult.bulkCreate(requesResult.result);
         }
+    }).catch((err)=>{
+        console.log(err);
     });
 }
 
