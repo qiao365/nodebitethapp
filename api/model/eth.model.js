@@ -3,7 +3,6 @@
 const appUtil = require("./util.js");
 const net = require('net');
 const http = require("http");
-const datadir = '/Users/nevernew/var/data/ethereum/prod';
 //const datadir = '/Users/liuhr/data/blockdata/ethereum/prod';
 
 const TableDefine = require("../domain/database.define");
@@ -12,10 +11,11 @@ const DomainEthListener = TableDefine.DomainEthListener;
 const DomainSyncResult = TableDefine.DomainSyncResult;
 
 const Config = require("../domain/bitapp.prepare").CONFIG;
+const datadir = Config.ethereum.datadir;
 
 const Web3 = require("Web3");
 var web3 = new Web3(new Web3.providers.IpcProvider(`${datadir}/geth.ipc`, net));
-var rpc = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+var rpc = new Web3(new Web3.providers.HttpProvider(Config.ethereum.rpc));
 //var web3 = Web3;
 //web3.setProvider(new web3.providers.IpcProvider(`${datadir}/geth.ipc`, net));
 
