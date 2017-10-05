@@ -96,7 +96,7 @@ eth.startFilter = function startFilter() {
         var filter = rpc.eth.filter("latest");
         filter.watch((err, result)=>{
             if(!err){
-                return generateCreateAddressPromise(addressMap, result)();
+                return genereateWatchHandle(addressMap, result)();
             }else{
                 throw err;
             };
