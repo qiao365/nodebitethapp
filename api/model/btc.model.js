@@ -79,9 +79,10 @@ btc.startFilter = function startFilter() {
         });
         return addressMap;
     }).then((addressMap) => {
+        handleListenBtcblock(addressMap);
         btcFilter.promoserver = timer.setInterval(() => {
             return handleListenBtcblock(addressMap);
-        }, 0.5 * 60 * 1000);
+        }, 6 * 60 * 1000);
         return btcFilter.promoserver;
     });
 };
