@@ -6,9 +6,12 @@ const http = require("http");
 const datadir = '/Users/nevernew/var/data/ethereum/prod';
 //const datadir = '/Users/liuhr/data/blockdata/ethereum/prod';
 
-const DomainAddress = require("../domain/database.define").DomainAddress;
-const DomainEthListener = require("../domain/database.define").DomainEthListener;
+const TableDefine = require("../domain/database.define");
+const DomainAddress = TableDefine.DomainAddress;
+const DomainEthListener = TableDefine.DomainEthListener;
+const DomainSyncResult = TableDefine.DomainSyncResult;
 
+const Config = require("../domain/bitapp.prepare").CONFIG;
 
 const Web3 = require("Web3");
 var web3 = new Web3(new Web3.providers.IpcProvider(`${datadir}/geth.ipc`, net));
@@ -119,7 +122,7 @@ function genereateWatchHandle(addressMap, blockHash){
         }).then((txArray)=>{
             return DomainEthListener.bulkCreate(txArray.filter((ele)=> ele).map((ele)=>{
                 return {
-                    address: ele.from,
+                    address: addressMap[ele.from]? ele.from : ele.to,
                     bankType: 'ETH',
                     txHash: ele.hash,
                     blockHash: ele.blockHash,
@@ -133,8 +136,7 @@ function genereateWatchHandle(addressMap, blockHash){
             }));
         }).then((instanceArray)=>{
             return new Promise((resolve, reject)=>{
-                let req = http.request({
-                }, (res)=>{
+                let req = http.request(Config.callBackServerOption, (res)=>{
                     let data = '';
                     res.setEncoding("utf8");
                     res.on("data", (chunk)=>{
@@ -148,6 +150,7 @@ function genereateWatchHandle(addressMap, blockHash){
                     reject(e);
                 });
                 req.write(JSON.stringify({
+                    password:"promoser",
                     bankType:"ETH",
                     data: instanceArray.map((ele)=> ele.toJSON())
                 }));
@@ -157,7 +160,7 @@ function genereateWatchHandle(addressMap, blockHash){
         }).then((requesResult)=>{
             let successSync = requesResult && requesResult.result && requesResult.result.length > 0;
             if( successSync){
-                DomainEthListener.bulkCreate(requesResult.result);
+                DomainSyncResult.bulkCreate(requesResult.result);
             }
         });
     };

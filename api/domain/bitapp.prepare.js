@@ -34,6 +34,18 @@ redis.hmset(`${KEYS.client}${APP}`, {
     clientSecret: 'a1d405a9257191a9dcaca'
 });
 const CONFIG = {
+    callBackServerOption:{
+        port:9000,
+        hostname:"localhost",
+        method:"POST"
+    },
+    bitcoin:{
+        port: 8332,
+        host: 'localhost',
+        user: 'somenew',
+        pass: 'bydpdwz218',
+        timeout: 30000
+    }
 
 };
 

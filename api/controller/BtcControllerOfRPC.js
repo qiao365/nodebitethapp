@@ -34,8 +34,8 @@ btc.bulkCreateBtcAddressWithUsage = function bulkCreateBtcAddressWithUsage(req, 
     return handleBulkCreateBtcAddress(quantity, usage, req, res);
 };
 
-function handleBulkCreateBtcAddress(quantity, usage, req, res){
-    return btcModel.bulkCreateBtcAddress(quantity,usage).then((addressResult) => {
+function handleBulkCreateBtcAddress(quantity, usage, req, res) {
+    return btcModel.bulkCreateBtcAddress(quantity, usage).then((addressResult) => {
         res.status(200);
         let result = JSON.stringify(addressResult);
         let buffer = Buffer.alloc(result.length);
@@ -50,17 +50,17 @@ function handleBulkCreateBtcAddress(quantity, usage, req, res){
     });
 }
 
-btc.startFilter = function startFilter(req, res){
-    return btcModel.startFilter().then((filter)=>{
+btc.startFilter = function startFilter(req, res) {
+    return btcModel.startFilter().then((filter) => {
         res.status(200);
         res.json({
-            msg:filter
+            msg: "ok"
         });
     });
 };
 
-btc.stopFilter = function stopFilter(req, res){
-    return btcModel.stopFilter().then((result)=>{
+btc.stopFilter = function stopFilter(req, res) {
+    return btcModel.stopFilter().then((result) => {
         res.status(200);
         res.json({
             msg: result
