@@ -79,9 +79,10 @@ btc.startFilter = function startFilter() {
         });
         return addressMap;
     }).then((addressMap) => {
+        handleListenBtcblock(addressMap);
         btcFilter.promoserver = timer.setInterval(() => {
             return handleListenBtcblock(addressMap);
-        }, 0.5 * 60 * 1000);
+        }, 6 * 60 * 1000);
         return btcFilter.promoserver;
     });
 };
@@ -93,7 +94,7 @@ function handleListenBtcblock(addressMap) {
     return new Promise((resolve, reject)=>{
         client.getBlockCount((err, height, resHeader)=>{
             if(!err){
-                console.log(height);
+                // console.log(height);
                 resolve(height);
             }else{
                 reject(err);
@@ -105,7 +106,7 @@ function handleListenBtcblock(addressMap) {
             return new Promise((resolve, reject)=>{
                 client.getBlockHash(blockHeight, (err, result, resHeader)=>{
                     if(!err){
-                        console.log(result);
+                        // console.log(result);
                         resolve(result);
                     }else {
                         reject(err);
@@ -130,20 +131,24 @@ function handleListenBtcblock(addressMap) {
             });
         });
     }).then((blockJson)=>{
-        let bulkTxInfo = blockJson.tx.map((ele, idx) => {
-            return new Promise((resolve, reject) => {
-                bitcoin.getTransaction(ele, (err, tx, resHeader)=>{
-                    if(!err){
-                        console.log(tx);
-                        tx.txIndex = idx;
-                        resolve(tx);
-                    }else {
-                        reject(err);
-                    };
-                });
+        let batchTx = blockJson.tx.map((ele, idx)=>{
+            return {
+                method:"gettransaction",
+                params:[ele]
+            };
+        });
+        return new Promise((resolve, reject)=>{
+            client.cmd(batchTx, (err, txarray, resHeader)=>{
+                if(!err){
+                    txarray.forEach((ele, idx)=>{
+                        ele.txIndex = idx;
+                    });
+                    resolve(txarray);
+                }else{
+                    reject(err);
+                };
             });
         });
-        return Promise.all(bulkTxInfo);
     }).then((txArray) => {
         let relativeTx = txArray.filter((ele) => {
             let isRelative = ele.details.filter((ele) => {
