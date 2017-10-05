@@ -2,7 +2,7 @@ var Sequelize = require('sequelize');
 const KEYS = require("../model/oauth2.model").KEYS;
 
 const APP = "nodebitapp";
-var sequelize = new Sequelize(APP, APP, APP, {
+var sequelize = new Sequelize(APP, APP, `${APP}_localtest`, {
     host: "localhost",
     logging: true,
     define: {
