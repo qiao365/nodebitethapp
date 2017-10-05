@@ -90,9 +90,12 @@ let blockHeight = 0;
 
 function handleListenBtcblock(addressMap) {
     blockHeight = blockHeight || client.getBlockCount();
+    console.log("blockHeight:"+blockHeight);
     let blockHash = client.getBlockHash();
+    console.log("blockHash:"+blockHash);
     blockHeight += 1;
     let blockJSON = client.getBlock(blockHash, 1); // 0 string , 1 json
+    console.log("blockJson:"+blockJSON);
     let bulkTxInfo = blockJSON.tx.map((ele, idx) => {
         return new Promise((resolve, reject) => {
             let tx = bitcoin.getTransaction(ele);
