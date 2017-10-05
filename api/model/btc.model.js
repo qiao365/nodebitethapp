@@ -94,7 +94,7 @@ function handleListenBtcblock(addressMap) {
     return new Promise((resolve, reject)=>{
         client.getBlockCount((err, height, resHeader)=>{
             if(!err){
-                console.log(height);
+                // console.log(height);
                 resolve(height);
             }else{
                 reject(err);
@@ -106,7 +106,7 @@ function handleListenBtcblock(addressMap) {
             return new Promise((resolve, reject)=>{
                 client.getBlockHash(blockHeight, (err, result, resHeader)=>{
                     if(!err){
-                        console.log(result);
+                        // console.log(result);
                         resolve(result);
                     }else {
                         reject(err);
