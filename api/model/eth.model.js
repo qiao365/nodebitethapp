@@ -83,7 +83,7 @@ eth.startFilter = function startFilter() {
         where: {
             bankType: "ETH",
             status: "used",
-            usage: "promoserver"
+            usage: "promoico"
         }
     }).then((instanceArray) => {
         addressMap = new Object(null);

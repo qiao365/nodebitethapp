@@ -70,7 +70,7 @@ btc.startFilter = function startFilter() {
             where: {
                 bankType: "BTC",
                 status: "used",
-                usage: "promoser"
+                usage: "promoico"
             }
         });
     }).then((instanceArray) => {
