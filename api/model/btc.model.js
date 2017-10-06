@@ -90,7 +90,6 @@ btc.startFilter = function startFilter() {
 var blockHeight = 0;
 
 function handleListenBtcblock(addressMap) {
-    let blockHash = '';
     return new Promise((resolve, reject)=>{
         client.getBlockCount((err, height, resHeader)=>{
             if(!err){
@@ -115,65 +114,35 @@ function handleListenBtcblock(addressMap) {
             });
         }else{
             throw {
-                code: 2000
+                code: 2000,
+                msg: "has checked"
             };
         }
     }).then((blockhash)=>{
-        blockHash = blockhash;
         return new Promise((resolve, reject)=>{
-            client.getBlock(blockHash, 1, (err, result, resHeader)=>{
+            client.listSinceBlock(blockhash, 1, (err, result, resHeader)=>{
                 if(!err){
-                    console.log(result);
-                    resolve(result);
-                }else{
-                    reject(err);
-                };
-            });
-        });
-    }).then((blockJson)=>{
-        let batchTx = blockJson.tx.map((ele, idx)=>{
-            return {
-                method:"gettransaction",
-                params:[ele]
-            };
-        });
-        return new Promise((resolve, reject)=>{
-            client.cmd(batchTx, (err, txarray, resHeader)=>{
-                if(!err){
-                    txarray.forEach((ele, idx)=>{
-                        ele.txIndex = idx;
-                    });
-                    resolve(txarray);
+                    // console.log(result);
+                    resolve(result.transactions);
                 }else{
                     reject(err);
                 };
             });
         });
     }).then((txArray) => {
-        let relativeTx = txArray.filter((ele) => {
-            let isRelative = ele.details.filter((ele) => {
-                return addressMap[ele.address];
-            }).length > 0;
-            return isRelative;
-        }).map((ele) => {
-            ele.txFrom = ele.details.filter((ele) => ele.category == 'send');
-            ele.txTo = ele.details.filter((ele) => ele.category == 'receive');
-            ele.txWithdraw = ele.txFrom.filter((ele) => addressMap[ele.address]);
-            ele.txDeposit = ele.txTo.filter((ele) => addressMap[ele.address]);
-            return ele;
-        }).map((ele) => {
+        let relativeTx = txArray.map((ele) => {
             return {
-                address: (ele.txWithdraw[0] || ele.txDeposit[0]).address,
+                address: ele.address,
                 bankType: 'BTC',
                 txHash: ele.txid,
-                blockHash,
+                blockHash: ele.blockHash,
                 blockNumber: blockHeight,
-                txFrom: ele.txFrom,
-                txTo: ele.txTo,
-                txWithdraw: ele.txWithdraw,
-                txDeposit: ele.txDeposit,
-                txInput: (ele.txWithdraw[0] || ele.txDeposit[0]).amount,
-                txIndex: ele.txIndex
+                txFrom: ele.category == 'send' ? ele.address : '',
+                txTo: ele.category == 'receive' ? ele.address : '',
+                txValue: ele.amount,
+                txInput: ele.amount,
+                txIndex: ele.blockindex,
+                txDate: new Date(ele.timereceived * 1000)
             };
         });
         return DomainBtcListener.bulkCreate(relativeTx);
