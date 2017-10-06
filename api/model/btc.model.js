@@ -165,7 +165,7 @@ function handleListenBtcblock(addressMap) {
                 bankType: "BTC",
                 data: instanceArray.map((ele) => {
                     let ej = Object.assign({}, ele.toJSON());
-                    ej.txValue = ej.txValue / 1e10;
+                    ej.txHuman = ej.txValue / 1e10;
                     return ej;
                 })
             }));

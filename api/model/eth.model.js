@@ -154,7 +154,7 @@ function genereateWatchHandle(addressMap, blockHash){
                     bankType:"ETH",
                     data: instanceArray.map((ele)=> {
                         let ej = Object.assign({}, ele.toJSON());
-                        ej.txValue = ej.txValue / 1e18;
+                        ej.txHuman = ej.txValue / 1e18;
                         return ej;
                     })
                 }));
