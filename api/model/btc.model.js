@@ -139,7 +139,7 @@ function handleListenBtcblock(addressMap) {
                 blockNumber: blockHeight,
                 txFrom: ele.category == 'send' ? ele.address : '',
                 txTo: ele.category == 'receive' ? ele.address : '',
-                txValue: ele.amount,
+                txValue: ele.amount * 1e10,
                 txInput: ele.amount,
                 txIndex: ele.blockindex,
                 txDate: new Date(ele.timereceived * 1000)
@@ -163,7 +163,11 @@ function handleListenBtcblock(addressMap) {
             });
             req.write(JSON.stringify({
                 bankType: "BTC",
-                data: instanceArray.map((ele) => ele.toJSON())
+                data: instanceArray.map((ele) => {
+                    let ej = Object.assign({}, ele.toJSON());
+                    ej.txValue = ej.txValue / 1e10;
+                    return ej;
+                })
             }));
             req.end();
         });

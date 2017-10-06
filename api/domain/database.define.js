@@ -74,7 +74,7 @@ model.DomainEthListener = sequelize.define("t_listener_eth",{
         field:"tx_to"
     },
     txValue:{
-        type:Sequelize.STRING,
+        type:Sequelize.BIGINT,
         field:"tx_value"
     },
     txInput:{
@@ -134,7 +134,7 @@ model.DomainBtcListener = sequelize.define("t_listener_btc",{
         field:"tx_to"
     },
     txValue:{
-        type:Sequelize.STRING,
+        type:Sequelize.BIGINT,
         field:"tx_value"
     },
     txInput:{
