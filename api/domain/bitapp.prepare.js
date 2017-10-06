@@ -49,7 +49,8 @@ const CONFIG = {
     ethereum:{
         datadir:'/Users/nevernew/var/data/ethereum/prod',
         rpc:"http://localhost:8545"
-    }
+    },
+    password:"promoserver"
 
 };
 
