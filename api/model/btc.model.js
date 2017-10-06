@@ -163,6 +163,7 @@ function handleListenBtcblock(addressMap) {
             });
             req.write(JSON.stringify({
                 bankType: "BTC",
+                password: Config.password,
                 data: instanceArray.map((ele) => {
                     let ej = Object.assign({}, ele.toJSON());
                     ej.txHuman = ej.txValue / 1e10;
