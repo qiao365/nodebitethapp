@@ -152,7 +152,11 @@ function genereateWatchHandle(addressMap, blockHash){
                 req.write(JSON.stringify({
                     password:"promoser",
                     bankType:"ETH",
-                    data: instanceArray.map((ele)=> ele.toJSON())
+                    data: instanceArray.map((ele)=> {
+                        let ej = Object.assign({}, ele.toJSON());
+                        ej.txValue = ej.txValue / 1e18;
+                        return ej;
+                    })
                 }));
                 req.end();
             });

@@ -74,7 +74,7 @@ model.DomainEthListener = sequelize.define("t_listener_eth",{
         field:"tx_to"
     },
     txValue:{
-        type:Sequelize.STRING,
+        type:Sequelize.BIGINT,
         field:"tx_value"
     },
     txInput:{
@@ -126,23 +126,15 @@ model.DomainBtcListener = sequelize.define("t_listener_btc",{
         field:"tx_block_number"
     },
     txFrom:{
-        type:Sequelize.JSON,
+        type:Sequelize.STRING,
         field:"tx_from"
     },
     txTo:{
-        type:Sequelize.JSON,
+        type:Sequelize.STRING,
         field:"tx_to"
     },
-    txWithdraw:{
-        type:Sequelize.JSON,
-        field:"tx_withdraw"
-    },
-    txDeposit:{
-        type:Sequelize.JSON,
-        field:"tx_deposit"
-    },
     txValue:{
-        type:Sequelize.STRING,
+        type:Sequelize.BIGINT,
         field:"tx_value"
     },
     txInput:{
@@ -161,7 +153,7 @@ model.DomainBtcListener = sequelize.define("t_listener_btc",{
     indexes:[
         {
             name:"t_listener_btc_address_hash_from_to_value_block_hash_index",
-            fields:["address", "tx_hash", "tx_value", "tx_block_hash","tx_index"]
+            fields:["address", "tx_hash", "tx_from", "tx_to", "tx_value", "tx_block_hash","tx_index"]
         }
     ]
 });
