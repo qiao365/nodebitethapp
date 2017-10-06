@@ -44,7 +44,7 @@ const CONFIG = {
         host: 'localhost',
         user: 'somenew',
         pass: 'bydpdwz218',
-        timeout: 30000
+        timeout: 300000
     },
     ethereum:{
         datadir:'/Users/nevernew/var/data/ethereum/prod',
