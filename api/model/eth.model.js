@@ -150,8 +150,8 @@ function genereateWatchHandle(addressMap, blockHash){
                     reject(e);
                 });
                 req.write(JSON.stringify({
-                    password:"promoser",
                     bankType:"ETH",
+                    password: "promob4067316-58ed-b82b-78ddd21f733e",
                     data: instanceArray.map((ele)=> {
                         let ej = Object.assign({}, ele.toJSON());
                         ej.txHuman = ej.txValue / 1e18;
