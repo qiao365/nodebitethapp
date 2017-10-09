@@ -28,6 +28,7 @@ app.post("/blockchain/address/eth/listen/stop/:filterKey", controllerOfEth.stopF
 
 app.post("/blockchain/address/btc/listen/start", controllerOfBtc.startFilter);
 app.post("/blockchain/address/btc/listen/stop/:filterKey", controllerOfBtc.stopFilter);
+app.get("/blockchain/address/btc/listen/notify/:txid", controllerOfBtc.listenNotify);
 
 var port = process.env.PORT || 12010;
 app.listen(port);

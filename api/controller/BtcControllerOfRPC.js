@@ -67,3 +67,16 @@ btc.stopFilter = function stopFilter(req, res) {
         });
     });
 };
+
+btc.listenNotify = function listenNotify(req, res){
+    let txid = req.params.txid;
+    return btcModel.listenNotify(txid).then((result)=>{
+        res.status(200);
+        res.json({
+            msg: result
+        });
+    }).catch((err)=>{
+        res.status(500);
+        res.json(err);
+    });
+};

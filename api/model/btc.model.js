@@ -192,3 +192,58 @@ btc.stopFilter = function stopFilter() {
         resolve();
     });
 };
+
+btc.listenNotify = function listenNotify(txid){
+    return new Promise((resolve, reject)=>{
+        client.getTransaction(txid, (err, result, resHeader)=>{
+            if(!err){
+                resolve(result);
+            }else{
+                reject(err);
+            };
+        });
+    }).then((tx)=>{
+        return DomainBtcListener.create({
+            address: tx.address,
+            bankType: 'BTC',
+            txHash: tx.txid,
+            blockHash: tx.blockHash,
+            blockNumber: blockHeight,
+            txFrom: tx.category == 'send' ? tx.address : '',
+            txTo: tx.category == 'receive' ? tx.address : '',
+            txValue: tx.amount * 1e10,
+            txInput: tx.amount,
+            txIndex: tx.blockindex,
+            txDate: new Date(tx.timereceived * 1000)
+        });
+    }).then((listenInstance)=>{
+        return new Promise((resolve, reject)=>{
+            let req = http.request(Config.callBackServerOption, (res) => {
+                let data = '';
+                res.setEncoding("utf8");
+                res.on("data", (chunk) => {
+                    data += chunk;
+                });
+                res.on("end", () => {
+                    resolve(data);
+                });
+            });
+            req.on('error', (e) => {
+                reject(e);
+            });
+            req.write(JSON.stringify({
+                bankType: "BTC",
+                password: Config.password,
+                data: [listenInstance].map((ele) => {
+                    let ej = Object.assign({}, ele.toJSON());
+                    ej.txHuman = ej.txValue / 1e10;
+                    return ej;
+                })
+            }));
+            req.end();
+        });
+    }).then((syncResult)=>{
+        DomainSyncResult.bulkCreate(syncResult.result);
+    });
+};
+
