@@ -203,19 +203,22 @@ btc.listenNotify = function listenNotify(txid){
             };
         });
     }).then((tx)=>{
-        return DomainBtcListener.create({
-            address: tx.address,
-            bankType: 'BTC',
-            txHash: tx.txid,
-            blockHash: tx.blockHash,
-            blockNumber: blockHeight,
-            txFrom: tx.category == 'send' ? tx.address : '',
-            txTo: tx.category == 'receive' ? tx.address : '',
-            txValue: tx.amount * 1e10,
-            txInput: tx.amount,
-            txIndex: tx.blockindex,
-            txDate: new Date(tx.timereceived * 1000)
+        let txDataSave = tx.details.map((ele)=>{
+            return {
+                address: ele.address,
+                bankType: 'BTC',
+                txHash: tx.txid,
+                blockHash: tx.blockHash,
+                blockNumber: blockHeight,
+                txFrom: ele.category == 'send' ? ele.address : '',
+                txTo: ele.category == 'receive' ? ele.address : '',
+                txValue: ele.amount * 1e10,
+                txInput: ele.amount,
+                txIndex: tx.blockindex,
+                txDate: new Date(tx.timereceived * 1000)
+            };
         });
+        return DomainBtcListener.bulkCreate(txDataSave);
     }).then((listenInstance)=>{
         return new Promise((resolve, reject)=>{
             let req = http.request(Config.callBackServerOption, (res) => {
@@ -234,7 +237,7 @@ btc.listenNotify = function listenNotify(txid){
             req.write(JSON.stringify({
                 bankType: "BTC",
                 password: Config.password,
-                data: [listenInstance].map((ele) => {
+                data: listenInstance.map((ele) => {
                     let ej = Object.assign({}, ele.toJSON());
                     ej.txHuman = ej.txValue / 1e10;
                     return ej;
