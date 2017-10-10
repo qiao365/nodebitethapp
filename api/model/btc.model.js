@@ -221,7 +221,21 @@ btc.listenNotify = function listenNotify(txid){
         return DomainBtcListener.bulkCreate(txDataSave);
     }).then((listenInstance)=>{
         return new Promise((resolve, reject)=>{
-            let req = http.request(Config.callBackServerOption, (res) => {
+            let write = JSON.stringify({
+                bankType: "BTC",
+                password: Config.password,
+                data: listenInstance.map((ele) => {
+                    let ej = Object.assign({}, ele.toJSON());
+                    ej.txHuman = ej.txValue / 1e10;
+                    return ej;
+                })
+            });
+            let option = Object.assign({}, Config.callBackServerOption);
+            option.headers= {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(write)
+            };
+            let req = http.request(option, (res) => {
                 let data = '';
                 res.setEncoding("utf8");
                 res.on("data", (chunk) => {
@@ -234,15 +248,7 @@ btc.listenNotify = function listenNotify(txid){
             req.on('error', (e) => {
                 reject(e);
             });
-            req.write(JSON.stringify({
-                bankType: "BTC",
-                password: Config.password,
-                data: listenInstance.map((ele) => {
-                    let ej = Object.assign({}, ele.toJSON());
-                    ej.txHuman = ej.txValue / 1e10;
-                    return ej;
-                })
-            }));
+            req.write();
             req.end();
         });
     }).then((syncResult)=>{

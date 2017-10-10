@@ -37,7 +37,8 @@ const CONFIG = {
     callBackServerOption:{
         port:9000,
         hostname:"localhost",
-        method:"POST"
+        method:"POST",
+        path:"/promo/ssl/public/fund/listen"
     },
     bitcoin:{
         port: 8332,

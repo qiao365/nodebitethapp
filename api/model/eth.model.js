@@ -9,13 +9,14 @@ const TableDefine = require("../domain/database.define");
 const DomainAddress = TableDefine.DomainAddress;
 const DomainEthListener = TableDefine.DomainEthListener;
 const DomainSyncResult = TableDefine.DomainSyncResult;
+const BigNumber = require('bignumber.js');
 
 const Config = require("../domain/bitapp.prepare").CONFIG;
 const datadir = Config.ethereum.datadir;
 
 const Web3 = require("Web3");
 var web3 = new Web3(new Web3.providers.IpcProvider(`${datadir}/geth.ipc`, net));
-var rpc = new Web3(new Web3.providers.HttpProvider(Config.ethereum.rpc));
+//var rpc = new Web3(new Web3.providers.HttpProvider(Config.ethereum.rpc));
 //var web3 = Web3;
 //web3.setProvider(new web3.providers.IpcProvider(`${datadir}/geth.ipc`, net));
 
@@ -93,7 +94,7 @@ eth.startFilter = function startFilter() {
         // console.log("address size:" + instanceArray.length);
         return addressMap;
     }).then((addressMap)=>{
-        var filter = rpc.eth.filter("latest");
+        var filter = web3.eth.filter("latest");
         filter.watch((err, result)=>{
             if(!err){
                 return genereateWatchHandle(addressMap, result)();
@@ -108,19 +109,20 @@ function genereateWatchHandle(addressMap, blockHash){
     return function watchhandle(){
         let lastBlock;
         return new Promise((resolve, reject)=>{
-            lastBlock = rpc.eth.getBlock(blockHash);
-            resolve(lastBlock);
-        }).then((theBlock)=>{
-            let bulkGetTx = theBlock.transactions.map((ele)=>{
-                return new Promise((resolve, reject)=>{
-                    let tx = rpc.eth.getTransaction(ele);
-                    let isRelative = addressMap[tx.from] || addressMap[tx.to];
-                    resolve(isRelative && tx);
-                });
+            console.log(blockHash);
+            web3.eth.getBlock(blockHash, (err, lastBlock)=>{
+                if(!err){
+                    resolve(lastBlock);
+                }else{
+                    reject(err);
+                };
             });
-            return Promise.all(bulkGetTx);
+        }).then((theBlock)=>{
+            return bulkGetTransaction(theBlock, addressMap);
         }).then((txArray)=>{
-            return DomainEthListener.bulkCreate(txArray.filter((ele)=> ele).map((ele)=>{
+            let filteredArray = txArray.filter((ele)=> ele);
+            console.log("all:"+txArray.length+",filtered:"+filteredArray.length);
+            return DomainEthListener.bulkCreate(filteredArray.map((ele)=>{
                 return {
                     address: addressMap[ele.from]? ele.from : ele.to,
                     bankType: 'ETH',
@@ -129,14 +131,28 @@ function genereateWatchHandle(addressMap, blockHash){
                     blockNumer: ele.blockNumber,
                     txFrom: ele.from,
                     txTo: ele.to,
-                    txValue: ele.value,
+                    txValue: new BigNumber(ele.value).toNumber(),
                     txInput: ele.input,
                     txIndex: ele.transactionIndex
                 };
             }));
         }).then((instanceArray)=>{
             return new Promise((resolve, reject)=>{
-                let req = http.request(Config.callBackServerOption, (res)=>{
+                let write = JSON.stringify({
+                    bankType:"ETH",
+                    password:Config.password,
+                    data: instanceArray.map((ele)=> {
+                        let ej = Object.assign({}, ele.toJSON());
+                        ej.txHuman = new BigNumber(ej.txValue).dividedBy(1e18).toNumber();
+                        return ej;
+                    })
+                });
+                let option = Object.assign({}, Config.callBackServerOption);
+                option.headers= {
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(write)
+                };
+                let req = http.request(option, (res)=>{
                     let data = '';
                     res.setEncoding("utf8");
                     res.on("data", (chunk)=>{
@@ -149,15 +165,7 @@ function genereateWatchHandle(addressMap, blockHash){
                 req.on('error', (e)=>{
                     reject(e);
                 });
-                req.write(JSON.stringify({
-                    bankType:"ETH",
-                    password:Config.password,
-                    data: instanceArray.map((ele)=> {
-                        let ej = Object.assign({}, ele.toJSON());
-                        ej.txHuman = ej.txValue / 1e18;
-                        return ej;
-                    })
-                }));
+                req.write(write);
                 req.end();
             });
             //发送异步请求
@@ -168,6 +176,40 @@ function genereateWatchHandle(addressMap, blockHash){
             }
         });
     };
+};
+
+let bulkGetTransaction = function(theBlock, addressMap){
+    return new Promise((resolve, reject)=>{
+        let txSize = theBlock.transactions.length;
+        let txArray = [];
+        function bulkFixNumberTrans(start, step){
+            let txidArray = theBlock.transactions.slice(start, start+step);
+            let bulkget = txidArray.map((txid)=>{
+                return new Promise((resolve, reject)=>{
+                    web3.eth.getTransaction(txid, (err, tx)=>{
+                        if(!err){
+                            let isRelative = addressMap[tx.from] || addressMap[tx.to];
+                            resolve(isRelative ? tx : undefined);
+                            //resolve(tx);
+                        }else {
+                            reject(err);
+                        };
+                    });
+                });
+            });
+            return Promise.all(bulkget).then((txarray)=>{
+                txArray.push.apply(txArray, txarray);
+                if(start + step >= txSize){
+                    return txArray;
+                }else{
+                    return bulkFixNumberTrans(start+step, step);
+                }
+            });
+        };
+        bulkFixNumberTrans(0, 1).then((txarray)=>{
+            resolve(txArray);
+        });
+    });
 };
 
 eth.stopFilter = function stopFilter(key) {
