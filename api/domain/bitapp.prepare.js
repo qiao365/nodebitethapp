@@ -38,7 +38,8 @@ const CONFIG = {
         port:9000,
         hostname:"localhost",
         method:"POST",
-        path:"/promo/ssl/public/fund/listen"
+        path:"/promo/ssl/public/fund/listen",
+        timeout: 300000
     },
     bitcoin:{
         port: 8332,
