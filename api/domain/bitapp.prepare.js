@@ -2,7 +2,7 @@ var Sequelize = require('sequelize');
 const KEYS = require("../model/oauth2.model").KEYS;
 
 const APP = "nodebitapp";
-var sequelize = new Sequelize(APP, APP, `${APP}_localtest`, {
+var sequelize = new Sequelize(APP, APP, `${APP}`, {
     host: "localhost",
     logging: true,
     define: {
@@ -47,8 +47,8 @@ const CONFIG = {
         timeout: 300000
     },
     ethereum:{
-        datadir:'/Users/nevernew/var/data/ethereum/prod',
-        rpc:"http://localhost:8545"
+        datadir:'/Users/liuhr/Library/Ethereum',
+        rpc:"http://127.0.0.1:8545"
     },
     password:"promoserver"
 
