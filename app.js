@@ -6,6 +6,8 @@ var oauthServer = require("express-oauth-server");
 
 var controllerOfEth = require("./api/controller/EthControllerOfIPC");
 var controllerOfBtc = require("./api/controller/BtcControllerOfRPC");
+var sequelize = require('./api/domain/bitapp.prepare').sequelize;
+const ethModel = require("./api/model/eth.model");
 
 var app = express();
 app.use(bodyParser.urlencoded({ extended:true }));
@@ -32,6 +34,11 @@ app.get("/blockchain/address/btc/listen/notify/:txid", controllerOfBtc.listenNot
 
 var port = process.env.PORT || 12010;
 app.listen(port);
+// need 
+
+sequelize.sync({force:false}).then(()=>{
+    ethModel.startFilter();
+});
 
 console.log(`> app is listening ${port}`);
 module.exports = app;

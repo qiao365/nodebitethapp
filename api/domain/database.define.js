@@ -188,6 +188,3 @@ model.DomainSyncResult = sequelize.define("t_sync_result",{
         }
     ]
 });
-// need 
-sequelize.sync({force:false}).then(()=>{
-});
