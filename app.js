@@ -25,11 +25,15 @@ app.post("/blockchain/address/eth/bulk/:usage/:quantity", controllerOfEth.bulkCr
 app.post("/blockchain/address/btc/bulk/:quantity", controllerOfBtc.bulkCreateBtcAddress);
 app.post("/blockchain/address/btc/bulk/:usage/:quantity", controllerOfBtc.bulkCreateBtcAddressWithUsage);
 
-app.post("/blockchain/address/eth/listen/start", controllerOfEth.startFilter);
-app.post("/blockchain/address/eth/listen/stop/:filterKey", controllerOfEth.stopFilter);
-
-app.post("/blockchain/address/btc/listen/start", controllerOfBtc.startFilter);
-app.post("/blockchain/address/btc/listen/stop/:filterKey", controllerOfBtc.stopFilter);
+/**
+ref:https://bitcoin.stackexchange.com/questions/24457/how-do-i-use-walletnotify
+--
+bitcoin.conf
+walletnotify=/home/scripts/transaction.sh %s
+--
+transaction.sh
+curl -G "http://127.0.0.1:12010/blockchain/address/btc/listen/notify/$1"
+**/
 app.get("/blockchain/address/btc/listen/notify/:txid", controllerOfBtc.listenNotify);
 
 var port = process.env.PORT || 12010;

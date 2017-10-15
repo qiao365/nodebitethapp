@@ -50,24 +50,6 @@ function handleBulkCreateBtcAddress(quantity, usage, req, res) {
     });
 }
 
-btc.startFilter = function startFilter(req, res) {
-    return btcModel.startFilter().then((filter) => {
-        res.status(200);
-        res.json({
-            msg: "ok"
-        });
-    });
-};
-
-btc.stopFilter = function stopFilter(req, res) {
-    return btcModel.stopFilter().then((result) => {
-        res.status(200);
-        res.json({
-            msg: result
-        });
-    });
-};
-
 btc.listenNotify = function listenNotify(req, res){
     let txid = req.params.txid;
     return btcModel.listenNotify(txid).then((result)=>{

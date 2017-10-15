@@ -61,138 +61,6 @@ function generateNewAddressPromise(password, key) {
     });
 };
 
-let btcFilter = {};
-
-btc.startFilter = function startFilter() {
-    let addressMap = new Object(null);
-    return btc.stopFilter().then(() => {
-        return DomainAddress.findAll({
-            where: {
-                bankType: "BTC",
-                status: "used",
-                usage: "promoico"
-            }
-        });
-    }).then((instanceArray) => {
-        instanceArray.forEach((ele) => {
-            addressMap[ele.toJSON().address] = true;
-        });
-        return addressMap;
-    }).then((addressMap) => {
-        handleListenBtcblock(addressMap);
-        btcFilter.promoserver = timer.setInterval(() => {
-            return handleListenBtcblock(addressMap);
-        }, 6 * 60 * 1000);
-        return btcFilter.promoserver;
-    });
-};
-
-var blockHeight = 0;
-
-function handleListenBtcblock(addressMap) {
-    return new Promise((resolve, reject)=>{
-        client.getBlockCount((err, height, resHeader)=>{
-            if(!err){
-                // console.log(height);
-                resolve(height);
-            }else{
-                reject(err);
-            };
-        });
-    }).then((height)=>{
-        if(height > blockHeight){
-            blockHeight = height;
-            return new Promise((resolve, reject)=>{
-                client.getBlockHash(blockHeight, (err, result, resHeader)=>{
-                    if(!err){
-                        // console.log(result);
-                        resolve(result);
-                    }else {
-                        reject(err);
-                    };
-                });
-            });
-        }else{
-            throw {
-                code: 2000,
-                msg: "has checked"
-            };
-        }
-    }).then((blockhash)=>{
-        return new Promise((resolve, reject)=>{
-            client.listSinceBlock(blockhash, 1, (err, result, resHeader)=>{
-                if(!err){
-                    // console.log(result);
-                    resolve(result.transactions);
-                }else{
-                    reject(err);
-                };
-            });
-        });
-    }).then((txArray) => {
-        let relativeTx = txArray.map((ele) => {
-            return {
-                address: ele.address,
-                bankType: 'BTC',
-                txHash: ele.txid,
-                blockHash: ele.blockHash,
-                blockNumber: blockHeight,
-                txFrom: ele.category == 'send' ? ele.address : '',
-                txTo: ele.category == 'receive' ? ele.address : '',
-                txValue: ele.amount * 1e10,
-                txInput: ele.amount,
-                txIndex: ele.blockindex,
-                txDate: new Date(ele.timereceived * 1000)
-            };
-        });
-        return DomainBtcListener.bulkCreate(relativeTx);
-    }).then((instanceArray) => {
-        return new Promise((resolve, reject) => {
-            let req = http.request(Config.callBackServerOption, (res) => {
-                let data = '';
-                res.setEncoding("utf8");
-                res.on("data", (chunk) => {
-                    data += chunk;
-                });
-                res.on("end", () => {
-                    resolve(data);
-                });
-            });
-            req.on('error', (e) => {
-                reject(e);
-            });
-            req.write(JSON.stringify({
-                bankType: "BTC",
-                password: Config.password,
-                data: instanceArray.map((ele) => {
-                    let ej = Object.assign({}, ele.toJSON());
-                    ej.txHuman = ej.txValue / 1e10;
-                    return ej;
-                })
-            }));
-            req.end();
-        });
-    }).then((requesResult) => {
-        let successSync = requesResult && requesResult.result && requesResult.result.length > 0;
-        if (successSync) {
-            DomainSyncResult.bulkCreate(requesResult.result);
-        }
-    }).catch((err)=>{
-        console.log(err);
-    });
-}
-
-
-btc.stopFilter = function stopFilter() {
-    return new Promise((resolve, reject) => {
-        if (btcFilter.promoserver) {
-            timer.clearInterval(btcFilter.promoserver);
-            btcFilter.promoserver = undefined;
-        }
-        resolve();
-    });
-};
-
 btc.listenNotify = function listenNotify(txid){
     return new Promise((resolve, reject)=>{
         client.getTransaction(txid, (err, result, resHeader)=>{
@@ -204,12 +72,13 @@ btc.listenNotify = function listenNotify(txid){
         });
     }).then((tx)=>{
         let txDataSave = tx.details.map((ele)=>{
+            // tx doest not have blockHeight
             return {
                 address: ele.address,
                 bankType: 'BTC',
                 txHash: tx.txid,
                 blockHash: tx.blockHash,
-                blockNumber: blockHeight,
+                blockNumber: 0,
                 txFrom: ele.category == 'send' ? ele.address : '',
                 txTo: ele.category == 'receive' ? ele.address : '',
                 txValue: ele.amount * 1e10,

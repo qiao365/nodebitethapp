@@ -81,21 +81,3 @@ eth.bulkCreateEthAddressWithUsage = function bulkCreateEthAddressWithUsage(req, 
     });
 };
 
-eth.startFilter = function startFilter(req, res) {
-    return ethModel.startFilter().then((filter) => {
-        res.status(200);
-        res.json({
-            msg: "ok"
-        });
-    });
-};
-
-eth.stopFilter = function startFilter(req, res) {
-    let filterKey = req.params.filterKey;
-    return ethModel.stopFilter(filterKey).then((result) => {
-        res.status(200);
-        res.json({
-            msg: result
-        });
-    });
-};

@@ -137,7 +137,7 @@ function genereateWatchHandle(addressMap, blockHash){
                 };
             }));
         }).then((instanceArray)=>{
-            return new Promise((resolve, reject)=>{
+            return {} || new Promise((resolve, reject)=>{
                 let write = JSON.stringify({
                     bankType:"ETH",
                     password:Config.password,
@@ -209,24 +209,5 @@ let bulkGetTransaction = function(theBlock, addressMap){
         bulkFixNumberTrans(0, 1).then((txarray)=>{
             resolve(txArray);
         });
-    });
-};
-
-eth.stopFilter = function stopFilter(key) {
-    return new Promise((resolve, reject) => {
-        let filter = ethFilter[key];
-        if (filter) {
-            filter.unsubscribe((error, success) => {
-                if (success) {
-                    console.log("Success unsubscribed");
-                    resolve("ok");
-                } else {
-                    reject("Error when unsubscribe");
-                }
-            });
-            ethFilter[key] = undefined;
-        } else {
-            resolve("ok");
-        };
     });
 };
