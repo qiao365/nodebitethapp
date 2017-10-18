@@ -6,6 +6,7 @@ var oauthServer = require("express-oauth-server");
 
 var controllerOfEth = require("./api/controller/EthControllerOfIPC");
 var controllerOfBtc = require("./api/controller/BtcControllerOfRPC");
+var controllerOfupdateBit = require("./api/controller/BitUpdatePromo");
 var sequelize = require('./api/domain/bitapp.prepare').sequelize;
 const ethModel = require("./api/model/eth.model");
 
@@ -35,6 +36,9 @@ transaction.sh
 curl -G "http://127.0.0.1:12010/blockchain/address/btc/listen/notify/$1"
 **/
 app.get("/blockchain/address/btc/listen/notify/:txid", controllerOfBtc.listenNotify);
+
+
+app.get("/promoserver/updatebit/bitlisten/:bankType", controllerOfupdateBit.updatePromoBitAddressWithUsage);
 
 var port = process.env.PORT || 12010;
 app.listen(port);

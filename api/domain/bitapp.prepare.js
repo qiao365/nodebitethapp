@@ -34,6 +34,13 @@ redis.hmset(`${KEYS.client}${APP}`, {
     clientSecret: 'a1d405a9257191a9dcaca'
 });
 const CONFIG = {
+    promoServerUpdateOption:{
+        port:8101,
+        hostname:"localhost",
+        method:"POST",
+        path:"/promo/ssl/public/fund/bitlisten",
+        timeout: 300000
+    },
     callBackServerOption:{
         port:9000,
         hostname:"localhost",
@@ -44,12 +51,12 @@ const CONFIG = {
     bitcoin:{
         port: 8332,
         host: 'localhost',
-        user: 'somenew',
-        pass: 'bydpdwz218',
+        user: 'ylkjcjq',
+        pass: 'ylkjcjq',
         timeout: 300000
     },
     ethereum:{
-        datadir:'/Users/liuhr/Library/Ethereum',
+        datadir:'/Users/ylkjcjq/Library/Ethereum',
         rpc:"http://127.0.0.1:8545"
     },
     password:"promoserver"
