@@ -55,7 +55,11 @@ btc.promoUpdate = function promoUpdate(bankType){
             password: Config.password,
             data: bitListenerArray.map((ele) => {
                 let ej = Object.assign({}, ele.toJSON());
-                ej.txHuman = ej.txValue / 1e10;
+                if(bankType == "BTC"){
+                    ej.txHuman = ej.txValue / 1e10;
+                }else if(bankType == "ETH"){
+                    ej.txHuman = ej.txValue / 1e18;
+                };
                 ej.id = null;
                 return ej;
             })
