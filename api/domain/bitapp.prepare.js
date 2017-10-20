@@ -51,12 +51,12 @@ const CONFIG = {
     bitcoin:{
         port: 8332,
         host: 'localhost',
-        user: 'ylkjcjq',
-        pass: 'ylkjcjq',
+        user: 'somenew',
+        pass: 'bydpdwz218',
         timeout: 300000
     },
     ethereum:{
-        datadir:'/Users/ylkjcjq/Library/Ethereum',
+        datadir:'/Users/liuhr/Library/Ethereum',
         rpc:"http://127.0.0.1:8545"
     },
     password:"promoserver"
