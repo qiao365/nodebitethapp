@@ -187,7 +187,7 @@ let bulkGetTransaction = function(theBlock, addressMap){
             let bulkget = txidArray.map((txid)=>{
                 return new Promise((resolve, reject)=>{
                     web3.eth.getTransaction(txid, (err, tx)=>{
-                        if(!err){
+                        if(!err && tx != null){
                             let isRelative = addressMap[tx.from] || addressMap[tx.to];
                             resolve(isRelative ? tx : undefined);
                             //resolve(tx);
